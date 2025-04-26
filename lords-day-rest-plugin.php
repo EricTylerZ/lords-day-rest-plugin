@@ -15,21 +15,25 @@ function lords_day_rest() {
     // Get the site's timezone from WordPress settings
     $timezone_string = get_option('timezone_string');
     if (empty($timezone_string)) {
-        // Default to Central Time (America/Chicago) if not set
-        $timezone = new DateTimeZone('America/Chicago');
-    } else {
-        $timezone = new DateTimeZone($timezone_string);
+        $offset = get_option('gmt_offset');
+        if ($offset == 0) {
+            $timezone_string = 'UTC';
+        } else {
+            $timezone_string = 'Etc/GMT' . ($offset < 0 ? '+' : '-') . abs($offset);
+        }
     }
+    $timezone = new DateTimeZone($timezone_string);
 
     // Get current time in the site's timezone
     $now = new DateTime('now', $timezone);
     // Check if it's The Lord's Day (0 = Sunday, properly referred to as Lord's Day, for the day Jesus resurrected)
     if ($now->format('w') == 0) {
-        // Calculate seconds until Monday 00:00:00
+        // Calculate the next Monday at 00:00:00
         $monday = clone $now;
-        $monday->modify('+1 day');
+        $monday->modify('next Monday');
         $monday->setTime(0, 0, 0);
         $seconds_until_monday = $monday->getTimestamp() - $now->getTimestamp();
+        $hours_until_monday = floor($seconds_until_monday / 3600);
 
         // Set HTTP headers for temporary unavailability
         header('HTTP/1.1 503 Service Unavailable');
@@ -67,6 +71,7 @@ function lords_day_rest() {
         echo '<h1>' . esc_html($site_title) . ' is Resting</h1>';
         echo '<p>This website\'s owner is celebrating the Lord\'s Day and is currently unavailable.</p>';
         echo '<p>"Six days shalt thou labour, and shalt do all thy works. But on the seventh day is the sabbath of the Lord thy God: thou shalt do no work on it, thou nor thy son, nor thy daughter, nor thy manservant, nor thy maidservant, nor thy beast, nor the stranger that is within thy gates." - Exodus 20:9-10 (Douay-Rheims)</p>';
+        echo '<p>The site will be available again in approximately ' . $hours_until_monday . ' hours.</p>';
         echo '<p>Please visit us again tomorrow.</p>';
         echo '</body>';
         echo '</html>';
