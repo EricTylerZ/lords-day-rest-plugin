@@ -19,7 +19,7 @@ Test mode for admins: add ?test_lords_day=1 to any URL to preview the rest mode.
 It's a must-have for strong Christians and Catholics (Catholics are Christian to the unaware) looking to make their website Christian-friendly while respecting the Sabbath rest.
 
 == Installation ==
-Upload the lords-day-rest-plugin-test.php file to the /wp-content/plugins/lords-day-rest-plugin-test directory, or install via the WordPress plugins screen.
+Upload the lords-day-rest-plugin.php file to the /wp-content/plugins/lords-day-rest-plugin directory, or install via the WordPress plugins screen.
 
 Activate the plugin through the 'Plugins' screen in WordPress.
 

@@ -16,7 +16,7 @@ The **Lord's Day Rest Plugin** helps Christian and Catholic website owners obser
 The plugin fixes timezone offset issues (e.g., correctly handling +6 and -6) by adjusting UTC time accurately, ensuring a seamless experience for all users.
 
 ## Installation
-1. Upload `lords-day-rest-plugin-test.php` to `/wp-content/plugins/lords-day-rest-plugin-test`.
+1. Upload `lords-day-rest-plugin.php` to `/wp-content/plugins/lords-day-rest-plugin`.
 2. Activate it via the WordPress 'Plugins' screen.
 3. Verify your timezone in Settings > General > Timezone.
 
