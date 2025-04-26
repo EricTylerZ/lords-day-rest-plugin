@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Lord's Day Rest Plugin
-Description: Puts the website into sleep mode on the Lord's Day based on the site's timezone, displaying the Lord's Message as a reminder. Conveniently by giving a 503 response, Search Engine Optimization (SEO) should not take a hit.  Go enjoy your day of rest.
+Description: Puts the website into sleep mode on the Lord's Day based on the site's timezone, displaying the Lord's Message as a reminder. Conveniently by giving a 503 response, Search Engine Optimization (SEO) should not take a hit. Go enjoy your day of rest.
 Version: 1.0
 Author: Eric Zosso of Zoseco Incorporated of Valparaiso Indiana
 License: GPL2
@@ -10,29 +10,47 @@ License: GPL2
 // Hook into template_redirect to control front-end display
 add_action('template_redirect', 'lords_day_rest');
 
-// Function to check if it's the Lord's Day and put the site to rest
+// Function to check if it's the Lord's Day or test mode and put the site to rest
 function lords_day_rest() {
+    // Check for test mode (admin-only)
+    $test_mode = (isset($_GET['test_lords_day']) && $_GET['test_lords_day'] == '1' && current_user_can('manage_options'));
+
     // Get the site's timezone from WordPress settings
     $timezone_string = get_option('timezone_string');
-    if (empty($timezone_string)) {
-        $offset = get_option('gmt_offset');
-        if ($offset == 0) {
-            $timezone_string = 'UTC';
+    $offset = get_option('gmt_offset');
+
+    if (!empty($timezone_string)) {
+        $timezone = new DateTimeZone($timezone_string);
+    } else {
+        // If no timezone string, use the offset to adjust UTC time
+        $timezone = new DateTimeZone('UTC');
+    }
+
+    // Get current UTC time
+    $now_utc = new DateTime('now', new DateTimeZone('UTC'));
+
+    // If timezone_string is set, use it directly
+    if (!empty($timezone_string)) {
+        $local_time = new DateTime('now', $timezone);
+    } else {
+        // Adjust UTC time by the offset (handles +6 and -6 correctly)
+        $local_time = clone $now_utc;
+        if ($offset >= 0) {
+            $local_time->add(new DateInterval('PT' . $offset . 'H'));
         } else {
-            $timezone_string = 'Etc/GMT' . ($offset < 0 ? '+' : '-') . abs($offset);
+            $local_time->sub(new DateInterval('PT' . abs($offset) . 'H'));
         }
     }
-    $timezone = new DateTimeZone($timezone_string);
 
-    // Get current time in the site's timezone
-    $now = new DateTime('now', $timezone);
-    // Check if it's The Lord's Day (0 = Sunday, properly referred to as Lord's Day, for the day Jesus resurrected)
-    if ($now->format('w') == 0) {
-        // Calculate the next Monday at 00:00:00
-        $monday = clone $now;
+    // Check if it's The Lord's Day (0 = Sunday)
+    $is_sunday = ($local_time->format('w') == 0);
+
+    if ($is_sunday || $test_mode) {
+        // Calculate the next Monday at 00:00:00 in local time
+        $monday = clone $local_time;
         $monday->modify('next Monday');
         $monday->setTime(0, 0, 0);
-        $seconds_until_monday = $monday->getTimestamp() - $now->getTimestamp();
+        $seconds_until_monday = $monday->getTimestamp() - $local_time->getTimestamp();
         $hours_until_monday = floor($seconds_until_monday / 3600);
 
         // Set HTTP headers for temporary unavailability
@@ -73,9 +91,19 @@ function lords_day_rest() {
         echo '<p>"Six days shalt thou labour, and shalt do all thy works. But on the seventh day is the sabbath of the Lord thy God: thou shalt do no work on it, thou nor thy son, nor thy daughter, nor thy manservant, nor thy maidservant, nor thy beast, nor the stranger that is within thy gates." - Exodus 20:9-10 (Douay-Rheims)</p>';
         echo '<p>The site will be available again in approximately ' . $hours_until_monday . ' hours.</p>';
         echo '<p>Please visit us again tomorrow.</p>';
+
+        if ($test_mode) {
+            echo '<p><strong>Test Mode:</strong><br>';
+            echo 'Current local time: ' . $local_time->format('Y-m-d H:i:s') . '<br>';
+            echo 'Timezone: ' . (empty($timezone_string) ? 'Offset ' . $offset . ' hours' : $timezone_string) . '<br>';
+            echo 'Is Lord\'s Day: ' . ($is_sunday ? 'Yes' : 'No') . '<br>';
+            echo 'Hours until Monday: ' . $hours_until_monday . '<br>';
+            echo '</p>';
+        }
+
         echo '</body>';
         echo '</html>';
         exit;
     }
-    // If not the Lord's Day, let the site load normally
+    // If not the Lord's Day and not test mode, let the site load normally
 }
