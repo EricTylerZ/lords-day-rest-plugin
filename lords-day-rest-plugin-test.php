@@ -43,13 +43,32 @@ function lords_day_rest_test() {
         header('Pragma: no-cache');
         header('Expires: 0');
 
-        // Output the rest message with the full Bible quote
+        // Get the site's title
+        $site_title = get_bloginfo('name');
+
+        // Output the rest message with the full Bible quote and custom styling
         echo '<!DOCTYPE html>';
         echo '<html>';
-        echo '<head><title>Website Resting</title></head>';
-        echo '<body style="text-align: center; padding: 50px;">';
-        echo '<h1>Website is Resting</h1>';
-        echo '<p>This website\'s owner is celebrating the Lord\'s Day and is currently unavailable. (Technically we\'re testing it on Saturday first.)</p>';
+        echo '<head><title>' . esc_html($site_title) . ' is Resting</title>';
+        echo '<style>';
+        echo 'body {';
+        echo '    background-color: #f5f5dc;'; // Cream background
+        echo '    color: #00918b;'; // Royal Turquoise text
+        echo '    font-family: "Century Schoolbook", Georgia, serif;'; // Font with fallback
+        echo '    text-align: center;';
+        echo '    padding: 50px;';
+        echo '}';
+        echo 'h1 {';
+        echo '    font-size: 2.5em;';
+        echo '}';
+        echo 'p {';
+        echo '    font-size: 1.2em;';
+        echo '}';
+        echo '</style>';
+        echo '</head>';
+        echo '<body>';
+        echo '<h1>' . esc_html($site_title) . ' is Resting</h1>';
+        echo '<p>This website\'s owner is celebrating the Lord\'s Day and is currently unavailable.</p>';
         echo '<p>"Six days shalt thou labour, and shalt do all thy works. But on the seventh day is the sabbath of the Lord thy God: thou shalt do no work on it, thou nor thy son, nor thy daughter, nor thy manservant, nor thy maidservant, nor thy beast, nor the stranger that is within thy gates." - Exodus 20:9-10 (Douay-Rheims)</p>';
         echo '<p>Please visit us again tomorrow.</p>';
         echo '</body>';
