@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Lord's Day Rest Plugin
-Description: A must-have WordPress plugin for strong Christians and Catholics who want to honor the Lord's Day by putting their website into rest mode; displaying a message from the Lord and maintaining some SEO care with a 503 response.
+Description: A must-have WordPress plugin for strong Christians and Catholics who want to honor the Lord's Day by putting their website into rest mode; displaying a message from the Lord and maintaining some SEO care with a 503 response. Use /?test_lords_day=1 to test on any page.
 Version: 1.1
 Author: Eric Zosso of Zoseco Incorporated of Valparaiso Indiana
 Author URI: https://zoseco.com
