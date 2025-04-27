@@ -1,10 +1,12 @@
 <?php
 /*
 Plugin Name: Lord's Day Rest Plugin
-Description: Puts the website into sleep mode on the Lord's Day based on the site's timezone, displaying the Lord's Message as a reminder. Conveniently by giving a 503 response, Search Engine Optimization (SEO) should not take a hit. Go enjoy your day of rest.
-Version: 1.0
+Description: A must-have WordPress plugin for strong Christians and Catholics who want to honor the Lord's Day by putting their website into rest mode; displaying a message from the Lord and maintaining some SEO care with a 503 response.
+Version: 1.1
 Author: Eric Zosso of Zoseco Incorporated of Valparaiso Indiana
-License: GPL2
+Author URI: https://zoseco.com
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
 
 // Hook into template_redirect to control front-end display
@@ -12,8 +14,8 @@ add_action('template_redirect', 'lords_day_rest');
 
 // Function to check if it's the Lord's Day or test mode and put the site to rest
 function lords_day_rest() {
-    // Check for test mode (admin-only)
-    $test_mode = (isset($_GET['test_lords_day']) && $_GET['test_lords_day'] == '1' && current_user_can('manage_options'));
+    // Check for test mode
+    $test_mode = isset($_GET['test_lords_day']) && $_GET['test_lords_day'] == '1';
 
     // Get the site's timezone from WordPress settings
     $timezone_string = get_option('timezone_string');
@@ -96,6 +98,7 @@ function lords_day_rest() {
             echo '<p><strong>Test Mode:</strong><br>';
             echo 'Current local time: ' . $local_time->format('Y-m-d H:i:s') . '<br>';
             echo 'Timezone: ' . (empty($timezone_string) ? 'Offset ' . $offset . ' hours' : $timezone_string) . '<br>';
+            echo 'UTC offset: ' . ($offset >= 0 ? '+' : '-') . abs($offset) . ' hours<br>';
             echo 'Is Lord\'s Day: ' . ($is_sunday ? 'Yes' : 'No') . '<br>';
             echo 'Hours until Monday: ' . $hours_until_monday . '<br>';
             echo '</p>';
@@ -105,5 +108,5 @@ function lords_day_rest() {
         echo '</html>';
         exit;
     }
-    // If not the Lord's Day and not test mode, let the site load normally
+    // If not the Lord's Day and/or not test mode, let the site load normally
 }
