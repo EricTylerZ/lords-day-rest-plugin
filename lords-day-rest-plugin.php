@@ -17,32 +17,18 @@ function lords_day_rest() {
     // Check for test mode
     $test_mode = isset($_GET['test_lords_day']) && $_GET['test_lords_day'] == '1';
 
-    // Get the site's timezone from WordPress settings
-    $timezone_string = get_option('timezone_string');
+    // Get the GMT offset from WordPress settings
     $offset = get_option('gmt_offset');
-
-    if (!empty($timezone_string)) {
-        $timezone = new DateTimeZone($timezone_string);
-    } else {
-        // If no timezone string, use the offset to adjust UTC time
-        $timezone = new DateTimeZone('UTC');
-    }
 
     // Get current UTC time
     $now_utc = new DateTime('now', new DateTimeZone('UTC'));
+    $local_time = clone $now_utc;
 
-    // If timezone_string is set, use it directly
-    if (!empty($timezone_string)) {
-        $local_time = new DateTime('now', $timezone);
-    } else {
-        // Adjust UTC time by the offset (handles +6 and -6 correctly)
-        $local_time = clone $now_utc;
-        if ($offset >= 0) {
-            $local_time->add(new DateInterval('PT' . $offset . 'H'));
-        } else {
-            $local_time->sub(new DateInterval('PT' . abs($offset) . 'H'));
-        }
-    }
+    // Calculate hours and minutes from offset to handle fractional values (e.g., 5.5 hours)
+    $offset_hours = floor(abs($offset));
+    $offset_minutes = (abs($offset) - $offset_hours) * 60;
+    $sign = ($offset >= 0 ? '+' : '-');
+    $local_time->modify($sign . $offset_hours . ' hours ' . $sign . $offset_minutes . ' minutes');
 
     // Check if it's The Lord's Day (0 = Sunday)
     $is_sunday = ($local_time->format('w') == 0);
@@ -96,9 +82,8 @@ function lords_day_rest() {
 
         if ($test_mode) {
             echo '<p><strong>Test Mode:</strong><br>';
-            echo 'Current local time: ' . $local_time->format('Y-m-d H:i:s') . '<br>';
-            echo 'Timezone: ' . (empty($timezone_string) ? 'Offset ' . $offset . ' hours' : $timezone_string) . '<br>';
-            echo 'UTC offset: ' . ($offset >= 0 ? '+' : '-') . abs($offset) . ' hours<br>';
+            echo 'Current local time (based on GMT offset): ' . $local_time->format('Y-m-d H:i:s') . '<br>';
+            echo 'GMT Offset: ' . number_format($offset, 1) . ' hours<br>';
             echo 'Is Lord\'s Day: ' . ($is_sunday ? 'Yes' : 'No') . '<br>';
             echo 'Hours until Monday: ' . $hours_until_monday . '<br>';
             echo '</p>';
